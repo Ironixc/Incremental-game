@@ -1,104 +1,63 @@
-using TMPro;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
-public class Upgrade : MonoBehaviour
+public class UpgradeItem : MonoBehaviour
 {
-    public MainScript Mainscript;
+    public MainScript mainScript;
+    public TextMeshProUGUI CostText;
+    public TextMeshProUGUI LevelText;
+    public Button upgradeButton;
 
-    public Button Upgrade_Gold_1_double_Gold_Upgrades_Button;
-    public TextMeshProUGUI Upgrade_Gold_1_double_Gold_Upgrades_Text;
-    private int Upgrade_Gold_1_double_Gold_Upgrades_Cost = 10;
-    private int Upgrade_Gold_1_double_Gold_Upgrades_Level = 0;
-    public float Upgrade_Gold_1_double_Gold_Upgrades_Boost = 1;
+    [Header("Visuals")]
+    public Image buttonImage; // The background image of the button
+    public Sprite defaultSprite; // The normal bronze look
+    public Sprite lockedSprite;  // The crossed-out locked look
 
-    public Button Upgrade_Gold_2_Increase_gold_base_Button;
-    public TextMeshProUGUI Upgrade_Gold_2_Increase_gold_base_Text;
-    private int Upgrade_Gold_2_Increase_gold_base_Cost = 10;
-    private int Upgrade_Gold_2_Increase_gold_base_Level = 0;
-
-
-    public Button Upgrade_Gold_3_exponent_Gold_Upgrades_Button;
-    public TextMeshProUGUI Upgrade_Gold_3_exponent_Gold_Upgrades_Text;
-    private int Upgrade_Gold_3_exponent_Gold_Upgrades_Cost = 10;
-    private int Upgrade_Gold_3_exponent_Gold_Upgrades_Level = 0;
-    public float Upgrade_Gold_3_exponent_Gold_Upgrades_Boost = 1;
-
-    public Button Upgrade_Gold_4_Boost_Gold_Upgrades_Button;
-    public TextMeshProUGUI Upgrade_Gold_4_Boost_Gold_Upgrades_Text;
-    private int Upgrade_Gold_4_Boost_Gold_Upgrades_Cost = 10;
-    private int Upgrade_Gold_4_Boost_Gold_Upgrades_Level = 0;
-    public float Upgrade_Gold_4_Boost_Gold_Upgrades_Boost = 1;
+    [Header("Stats")]
+    public int currentCost = 10;
+    public float costMultiplier = 1.5f;
+    public int currentLevel = 0;
+    public int maxLevel = 5; // Set this differently for each button in Unity!
 
     void Start()
     {
-        Upgrade_Gold_1_double_Gold_Upgrades_Text.text = "Level: " + Upgrade_Gold_1_double_Gold_Upgrades_Level + " | Cost: " + Upgrade_Gold_1_double_Gold_Upgrades_Cost;
-        Upgrade_Gold_1_double_Gold_Upgrades_Button.onClick.AddListener(UpgradeGold1);
-             
-        Upgrade_Gold_2_Increase_gold_base_Text.text = "Level: " + Upgrade_Gold_2_Increase_gold_base_Level + " | Cost: " + Upgrade_Gold_2_Increase_gold_base_Cost;
-        Upgrade_Gold_2_Increase_gold_base_Button.onClick.AddListener(UpgradeGold2);
-        
-        Upgrade_Gold_3_exponent_Gold_Upgrades_Text.text = "Level: " + Upgrade_Gold_3_exponent_Gold_Upgrades_Level + " | Cost: " + Upgrade_Gold_3_exponent_Gold_Upgrades_Cost;
-        Upgrade_Gold_3_exponent_Gold_Upgrades_Button.onClick.AddListener(UpgradeGold3);
-
-        Upgrade_Gold_4_Boost_Gold_Upgrades_Text.text = "Level: " + Upgrade_Gold_4_Boost_Gold_Upgrades_Level + " | Cost: " + Upgrade_Gold_4_Boost_Gold_Upgrades_Cost;
-        Upgrade_Gold_4_Boost_Gold_Upgrades_Button.onClick.AddListener(UpgradeGold4);
+        UpdateUI();
+        upgradeButton.onClick.AddListener(BuyUpgrade);
     }
 
-    public void UpgradeGold1()
+    public void BuyUpgrade()
     {
-        if (Mainscript.Gold >= Upgrade_Gold_1_double_Gold_Upgrades_Cost)
+        // Stop the player from buying if they are already at max level
+        if (currentLevel >= maxLevel) return;
+
+        if (mainScript.Gold >= currentCost)
         {
-            Mainscript.Gold -= Upgrade_Gold_1_double_Gold_Upgrades_Cost;
-            Upgrade_Gold_1_double_Gold_Upgrades_Cost = (int)(Upgrade_Gold_1_double_Gold_Upgrades_Cost * 1.5f);
-            Upgrade_Gold_1_double_Gold_Upgrades_Level++;
-            Upgrade_Gold_1_double_Gold_Upgrades_Text.text = "Level: " + Upgrade_Gold_1_double_Gold_Upgrades_Level + " | Cost: " + Upgrade_Gold_1_double_Gold_Upgrades_Cost;
-            CalculateBoosts();
-        }
-    }
-    public void UpgradeGold2()
-    {
-        if (Mainscript.Gold >= Upgrade_Gold_2_Increase_gold_base_Cost)
-        {
-            Mainscript.Gold -= Upgrade_Gold_2_Increase_gold_base_Cost;
-            Upgrade_Gold_2_Increase_gold_base_Cost = (int)(Upgrade_Gold_2_Increase_gold_base_Cost * 1.5f);
-            Upgrade_Gold_2_Increase_gold_base_Level++;
-            Upgrade_Gold_2_Increase_gold_base_Text.text = "Level: " + Upgrade_Gold_2_Increase_gold_base_Level + " | Cost: " + Upgrade_Gold_2_Increase_gold_base_Cost;
-            CalculateBoosts();
-        }
-    }
-    public void UpgradeGold3()
-    {
-        if (Mainscript.Gold >= Upgrade_Gold_3_exponent_Gold_Upgrades_Cost)
-        {
-            Mainscript.Gold -= Upgrade_Gold_3_exponent_Gold_Upgrades_Cost;
-            Upgrade_Gold_3_exponent_Gold_Upgrades_Cost = (int)(Upgrade_Gold_3_exponent_Gold_Upgrades_Cost * 1.5f);
-            Upgrade_Gold_3_exponent_Gold_Upgrades_Level++;
-            Upgrade_Gold_3_exponent_Gold_Upgrades_Text.text = "Level: " + Upgrade_Gold_3_exponent_Gold_Upgrades_Level + " | Cost: " + Upgrade_Gold_3_exponent_Gold_Upgrades_Cost;
-            CalculateBoosts();
+            mainScript.Gold -= currentCost;
+            currentCost = (int)(currentCost * costMultiplier);
+            currentLevel++;
+
+            UpdateUI();
+            mainScript.CalculateBoosts();
         }
     }
 
-    public void UpgradeGold4()
+    // Made this public so the CardManager can update the UI if the cap increases!
+    public void UpdateUI()
     {
-        if (Mainscript.Gold >= Upgrade_Gold_4_Boost_Gold_Upgrades_Cost)
+        LevelText.text = "" + currentLevel;
+
+        if (currentLevel >= maxLevel)
         {
-            Mainscript.Gold -= Upgrade_Gold_4_Boost_Gold_Upgrades_Cost;
-            Upgrade_Gold_4_Boost_Gold_Upgrades_Cost = (int)(Upgrade_Gold_4_Boost_Gold_Upgrades_Cost * 1.5f);
-            Upgrade_Gold_4_Boost_Gold_Upgrades_Level++;
-            Upgrade_Gold_4_Boost_Gold_Upgrades_Text.text = "Level: " + Upgrade_Gold_4_Boost_Gold_Upgrades_Level + " | Cost: " + Upgrade_Gold_4_Boost_Gold_Upgrades_Cost;
-            CalculateBoosts();
+            CostText.text = "MAX";
+            buttonImage.sprite = lockedSprite; // Change to the X sprite
+            upgradeButton.interactable = false; // Optional: stops the clicking animation
         }
-    }
-
-    private void CalculateBoosts()
-    {
-        Upgrade_Gold_4_Boost_Gold_Upgrades_Boost = 1 + (Upgrade_Gold_4_Boost_Gold_Upgrades_Level * 0.1f);
-
-        Upgrade_Gold_3_exponent_Gold_Upgrades_Boost = 1 + ((Upgrade_Gold_3_exponent_Gold_Upgrades_Level * 0.01f) * Upgrade_Gold_4_Boost_Gold_Upgrades_Boost);
-        Mainscript.BaseGold = 1 + (Upgrade_Gold_4_Boost_Gold_Upgrades_Boost * Upgrade_Gold_2_Increase_gold_base_Level);
-        Upgrade_Gold_1_double_Gold_Upgrades_Boost = (int)Mathf.Pow(2, Upgrade_Gold_1_double_Gold_Upgrades_Level) * Upgrade_Gold_4_Boost_Gold_Upgrades_Boost;
-
-
+        else
+        {
+            CostText.text = "" + currentCost;
+            buttonImage.sprite = defaultSprite; // Keep the normal bronze sprite
+            upgradeButton.interactable = true;
+        }
     }
 }
