@@ -10,15 +10,17 @@ public class UpgradeItem : MonoBehaviour
     public Button upgradeButton;
 
     [Header("Visuals")]
-    public Image buttonImage; // The background image of the button
-    public Sprite defaultSprite; // The normal bronze look
-    public Sprite lockedSprite;  // The crossed-out locked look
+    public Image buttonImage;
+    public Sprite defaultSprite;
+    public Sprite lockedSprite;
 
     [Header("Stats")]
     public int currentCost = 10;
     public float costMultiplier = 1.5f;
     public int currentLevel = 0;
     public int maxLevel = 5; // Set this differently for each button in Unity!
+
+    public AudioManager audioManager;
 
     void Start()
     {
@@ -40,9 +42,12 @@ public class UpgradeItem : MonoBehaviour
             UpdateUI();
             mainScript.CalculateBoosts();
         }
+        if (audioManager != null)
+        {
+            audioManager.PlayClick();
+        }
     }
 
-    // Made this public so the CardManager can update the UI if the cap increases!
     public void UpdateUI()
     {
         LevelText.text = "" + currentLevel;
@@ -59,5 +64,6 @@ public class UpgradeItem : MonoBehaviour
             buttonImage.sprite = defaultSprite; // Keep the normal bronze sprite
             upgradeButton.interactable = true;
         }
+       
     }
 }

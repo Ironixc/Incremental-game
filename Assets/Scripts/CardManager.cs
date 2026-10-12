@@ -17,17 +17,42 @@ public class PowerData
 public class CardManager : MonoBehaviour
 {
     public MainScript mainScript;
-    public Goals levelTimer; // <-- NEW: Drag your Goals object here in Unity!
+    public Goals levelTimer;
     public GameObject popupPanel;
     public PowerCard[] cardSlots;
 
-    [Header("All Game Powers (Main Deck)")]
+    [HideInInspector]
     public List<PowerData> allPossiblePowers;
+
+    private void Awake()
+    {
+        allPossiblePowers = new List<PowerData>
+        {
+            // === COMMON CARDS ===
+            new PowerData { powerID = 1, title = "Base Upgrader", descriptionPlus = "Max Level + 1", descriptionMinus = "-", rarity = CardRarity.Common },
+            new PowerData { powerID = 2, title = "Upgrade Double", descriptionPlus = "Max Level + 2", descriptionMinus = "Cost x 1.1", rarity = CardRarity.Common },
+            new PowerData { powerID = 3, title = "Upgrade Exponent", descriptionPlus = "+ 1 Level", descriptionMinus = "Time -30s", rarity = CardRarity.Common },
+            new PowerData { powerID = 4, title = "Upgrade Boost", descriptionPlus = "+ 1 Level", descriptionMinus = "All Costs x 1.05", rarity = CardRarity.Common },
+            new PowerData { powerID = 6, title = "Base Increment", descriptionPlus = "Increment + 0.1", descriptionMinus = "Time -90s", rarity = CardRarity.Common },
+            new PowerData { powerID = 7, title = "Booster Increment", descriptionPlus = "Increment + 0.005", descriptionMinus = "All Costs x 1.1", rarity = CardRarity.Common },
+            new PowerData { powerID = 8, title = "Small Time", descriptionPlus = "Time + 30s", descriptionMinus = "Goal Multiplier + 0.1", rarity = CardRarity.Common },
+            new PowerData { powerID = 9, title = "Medium Time", descriptionPlus = "Time + 240s", descriptionMinus = "Goal Multiplier + 0.5", rarity = CardRarity.Rare },
+
+            // === RARE CARDS ===
+            new PowerData { powerID = 10, title = "Rare Base", descriptionPlus = "Max Level + 10", descriptionMinus = "-", rarity = CardRarity.Rare },
+            new PowerData { powerID = 11, title = "Rare Double", descriptionPlus = "Max Level + 7", descriptionMinus = "Goal Multiplier + 0.1", rarity = CardRarity.Rare },
+            new PowerData { powerID = 12, title = "Rare Compounding", descriptionPlus = "Max Level + 2", descriptionMinus = "Time -30s", rarity = CardRarity.Rare },
+            new PowerData { powerID = 13, title = "Rare ", descriptionPlus = "Max Level + 3", descriptionMinus = "All Costs x 1.05", rarity = CardRarity.Rare },
+            new PowerData { powerID = 14, title = "Global Boost", descriptionPlus = "Global x 1.1", descriptionMinus = "Base Cost x 1.5", rarity = CardRarity.Rare },
+            new PowerData { powerID = 15, title = "Rare Time", descriptionPlus = "Time + 30s", descriptionMinus = "-", rarity = CardRarity.Rare },
+            new PowerData { powerID = 16, title = "Big Global Boost", descriptionPlus = "Global x 1.25", descriptionMinus = "Boost Cost x 1.5", rarity = CardRarity.Rare },
+        };
+    }
 
     public void ShowCards()
     {
         popupPanel.SetActive(true);
-        Time.timeScale = 0f; 
+        Time.timeScale = 0f;
 
         List<PowerData> tempDeck = new List<PowerData>(allPossiblePowers);
 
@@ -37,8 +62,7 @@ public class CardManager : MonoBehaviour
             CardRarity targetRarity;
 
             if (roll < 71) targetRarity = CardRarity.Common;
-            else if (roll < 98) targetRarity = CardRarity.Rare;
-            else targetRarity = CardRarity.Epic;
+            else targetRarity = CardRarity.Rare;
 
             List<PowerData> validCards = tempDeck.FindAll(card => card.rarity == targetRarity);
 
@@ -55,147 +79,86 @@ public class CardManager : MonoBehaviour
             tempDeck.Remove(pickedPower);
         }
     }
+
     public void CardWasPicked(int chosenPowerID)
     {
         switch (chosenPowerID)
         {
-            // === COMMON CARDS ===
-            case 1: // M + 10, C x 1.1
-                mainScript.upgradeBase.maxLevel += 10;
-                mainScript.upgradeBase.costMultiplier *= 1.1f;
+            case 1:
+                mainScript.upgradeBase.maxLevel += 1;
                 mainScript.upgradeBase.UpdateUI();
                 break;
-            case 2: // Double + 3, C x 1.15
-                mainScript.upgradeDouble.maxLevel += 3;
-                mainScript.upgradeDouble.costMultiplier *= 1.15f;
+            case 2:
+                mainScript.upgradeDouble.maxLevel += 1;
+                mainScript.upgradeDouble.costMultiplier *= 1.1f;
                 mainScript.upgradeDouble.UpdateUI();
                 break;
-            case 3: // Compounding + 1, Time - 30s
-                mainScript.upgradeExponent.maxLevel += 1;
-                levelTimer.RemainingTime -= 30f;
+            case 3:
+                mainScript.upgradeExponent.currentLevel += 1;
+                levelTimer.RemainingTime -= 60f;
                 mainScript.upgradeExponent.UpdateUI();
                 break;
-            case 4: // Booster + 1, All Cost x 1.05
-                mainScript.upgradeBoost.maxLevel += 1;
-                MultiplyAllCosts(1.05f); // Uses helper method at bottom
+            case 4:
+                mainScript.upgradeBoost.currentLevel += 1;
+                MultiplyAllCosts(1.05f);
                 mainScript.upgradeBoost.UpdateUI();
                 break;
-            case 5: // More Bronze + 2, Time - 90s
-                mainScript.upgradeBase.maxLevel += 2;
-                levelTimer.RemainingTime -= 90f;
-                mainScript.upgradeBase.UpdateUI();
-                break;
-            case 6: // Base Increment + 0.1, Time - 180s
+            case 6:
                 mainScript.baseGoldIncrement += 0.1f;
-                levelTimer.RemainingTime -= 180f;
-                mainScript.CalculateBoosts(); // Recalculate immediately
+                levelTimer.RemainingTime -= 90f;
+                mainScript.CalculateBoosts();
                 break;
-            case 7: // Booster Increment + 0.005, All Cost x 1.1
+            case 7:
                 mainScript.boosterIncrement += 0.005f;
                 MultiplyAllCosts(1.1f);
                 mainScript.CalculateBoosts();
                 break;
-            case 8: // Time + 30s
-                levelTimer.RemainingTime += 30f;
+            case 8:
+                levelTimer.RemainingTime += 60f;
+                levelTimer.GoalMultiplier += 0.1f;
                 break;
-            case 9: // Time + 240s, All Cost x 1.1
+            case 9:
                 levelTimer.RemainingTime += 240f;
-                MultiplyAllCosts(1.1f);
+                levelTimer.GoalMultiplier += 0.5f;
                 break;
 
             // === RARE CARDS ===
-            case 10: // M + 10, C x 1.05
+            case 10:
                 mainScript.upgradeBase.maxLevel += 10;
-                mainScript.upgradeBase.costMultiplier *= 1.05f;
+                mainScript.upgradeBase.costMultiplier *= 1.3f;
                 mainScript.upgradeBase.UpdateUI();
                 break;
-            case 11: // Double + 5, C x 1.15
-                mainScript.upgradeDouble.maxLevel += 5;
-                mainScript.upgradeDouble.costMultiplier *= 1.15f;
+
+            // --- FIX FOR CASE 11 APPLIED HERE ---
+            case 11:
+                mainScript.upgradeDouble.maxLevel += 7;
+                levelTimer.GoalMultiplier += 0.1f;
                 mainScript.upgradeDouble.UpdateUI();
                 break;
-            case 12: // Compounding + 2, Time - 30s
-                mainScript.upgradeExponent.maxLevel += 2;
+
+            case 12:
+                mainScript.upgradeExponent.maxLevel += 3;
                 levelTimer.RemainingTime -= 30f;
+                levelTimer.GoalMultiplier += 0.5f;
                 mainScript.upgradeExponent.UpdateUI();
                 break;
-            case 13: // Booster + 3, All Cost x 1.05
+            case 13:
                 mainScript.upgradeBoost.maxLevel += 3;
                 MultiplyAllCosts(1.05f);
                 mainScript.upgradeBoost.UpdateUI();
                 break;
-            case 14: // Get 1.1x Global Boost, More Bronze Cost x 1.5
-                mainScript.globalGoldMultiplier *= 1.1f;
-                mainScript.upgradeBase.costMultiplier *= 1.5f;
-                mainScript.CalculateBoosts();
-                mainScript.upgradeBase.UpdateUI();
+            case 14:
+                levelTimer.GoalMultiplier -= 1;
+                levelTimer.RemainingTime -= 60f;
                 break;
-            case 15: // Time + 60s
-                levelTimer.RemainingTime += 60f;
-                break;
-            case 16: // Get 1.25x Global Boost, Booster Cost x 1.5
-                mainScript.globalGoldMultiplier *= 1.25f;
-                mainScript.upgradeBoost.costMultiplier *= 1.5f;
-                mainScript.CalculateBoosts();
-                mainScript.upgradeBoost.UpdateUI();
-                break;
-            case 17: // Time + 600s, Compounding penalty
-                levelTimer.RemainingTime += 600f;
-                // Note: I changed -0.05 to -0.005 so your math doesn't break into negatives!
-                mainScript.compoundingIncrement -= 0.005f;
-                mainScript.CalculateBoosts();
-                break;
-
-            // === EPIC CARDS ===
-            case 18: // All Caps + 1 Free
-                mainScript.upgradeDouble.maxLevel += 1;
-                mainScript.upgradeBase.maxLevel += 1;
-                mainScript.upgradeExponent.maxLevel += 1;
-                mainScript.upgradeBoost.maxLevel += 1;
-
-                mainScript.upgradeDouble.UpdateUI();
-                mainScript.upgradeBase.UpdateUI();
-                mainScript.upgradeExponent.UpdateUI();
-                mainScript.upgradeBoost.UpdateUI();
-                break;
-            case 19: // Time + 240 Free
-                levelTimer.RemainingTime += 240f;
-                break;
-            case 20: // Reduce All Costs by 20%
-                MultiplyAllCosts(0.80f); // 0.8 is a 20% discount
-
-                // Immediately discount the CURRENT price tag on the screen too
-                mainScript.upgradeDouble.currentCost = (int)(mainScript.upgradeDouble.currentCost * 0.8f);
-                mainScript.upgradeBase.currentCost = (int)(mainScript.upgradeBase.currentCost * 0.8f);
-                mainScript.upgradeExponent.currentCost = (int)(mainScript.upgradeExponent.currentCost * 0.8f);
-                mainScript.upgradeBoost.currentCost = (int)(mainScript.upgradeBoost.currentCost * 0.8f);
-
-                mainScript.upgradeDouble.UpdateUI();
-                mainScript.upgradeBase.UpdateUI();
-                mainScript.upgradeExponent.UpdateUI();
-                mainScript.upgradeBoost.UpdateUI();
-                break;
-            case 21: // Global Boost x 1.5
-                mainScript.globalGoldMultiplier *= 1.5f;
-                mainScript.CalculateBoosts();
-                break;
-            case 22: // The 22nd Epic Card! (Time + 600, All Caps + 2, Costs x2)
-                levelTimer.RemainingTime += 600f;
-                mainScript.upgradeDouble.maxLevel += 2;
-                mainScript.upgradeBase.maxLevel += 2;
-                mainScript.upgradeExponent.maxLevel += 2;
-                mainScript.upgradeBoost.maxLevel += 2;
-                MultiplyAllCosts(2f);
-
-                mainScript.upgradeDouble.UpdateUI();
-                mainScript.upgradeBase.UpdateUI();
-                mainScript.upgradeExponent.UpdateUI();
-                mainScript.upgradeBoost.UpdateUI();
+            case 15:
+                levelTimer.RemainingTime += 30f;
                 break;
         }
 
         popupPanel.SetActive(false);
-        Time.timeScale = 1f;
+
+        Time.timeScale = mainScript.GetCurrentSpeed();
     }
 
     private void MultiplyAllCosts(float multiplierAmount)

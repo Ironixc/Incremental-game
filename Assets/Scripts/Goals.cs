@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System;
+using UnityEngine.SceneManagement; // REQUIRED to reload the scene
 
 public class Goals : MonoBehaviour
 {
@@ -11,44 +12,59 @@ public class Goals : MonoBehaviour
     public GameObject GameOver;
 
     public MainScript mainScript;
-    public CardManager cardManager; // <-- NEW: We need to link the Dealer here!
+    public CardManager cardManager;
+    public AudioManager audioManager;
 
+    [Header("Stats")]
     public float RemainingTime;
-    public int Goal = 50;
-    public int GoalMultiplier = 3;
-    void start()
+    public float Goal = 10f;
+    public float GoalMultiplier = 3f;
+
+    void Start()
     {
         Goal_Text.text = "Goal: " + Goal;
     }
+
     void Update()
     {
-        // 1. Check if the player has enough gold to hit the goal
-        if (mainScript.Gold >= Goal)
+        if (!mainScript.isGameOver)
         {
-            // Call the Manager to show the popup
-            cardManager.ShowCards();
+            if (mainScript.Gold >= Goal)
+            {
+                cardManager.ShowCards();
 
-            // Multiply the goal for the next milestone (e.g., 100 becomes 300)
-            Goal = Goal * GoalMultiplier;
+                Goal = Goal * GoalMultiplier;
 
-            mainScript.CompletedGoals++;
-            Goal_Text.text = "Goal: " + Goal;
+                mainScript.CompletedGoals++;
+                Goal_Text.text = "Goal: " + Mathf.RoundToInt(Goal);
+                mainScript.Gold = 0;
+                RemainingTime += 20f;
+                audioManager.GoalSoundPick();
+            }
 
+            if (RemainingTime > 0)
+            {
+                RemainingTime -= Time.deltaTime;
+            }
+
+            if (RemainingTime <= 0)
+            {
+                RemainingTime = 0;
+                mainScript.isGameOver = true;
+                CompletedGoals_text.text = "Completed Goals: " + mainScript.CompletedGoals;
+                GameOver.SetActive(true);
+                audioManager.DefeatSoundPick();
+            }
+
+            int minutes = Mathf.FloorToInt(RemainingTime / 60);
+            int seconds = Mathf.FloorToInt(RemainingTime % 60);
+            Timer_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
         }
+    }
 
-        if (RemainingTime > 0)
-        {
-            RemainingTime -= Time.deltaTime;
-        }
-        else if (RemainingTime <= 0)
-        {
-            RemainingTime = 0;
-            CompletedGoals_text.text = "Completed Goals: " + mainScript.CompletedGoals;
-            GameOver.SetActive(true);
-        }
-
-        int minutes = Mathf.FloorToInt(RemainingTime / 60);
-        int seconds = Mathf.FloorToInt(RemainingTime % 60);
-        Timer_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+    public void RetryGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
