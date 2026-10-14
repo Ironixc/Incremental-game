@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 7abca0fbf1bcf2c49a246e04a14fdea2
+guid: 1e173eff712e10d4f92b7d632a17239b
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -127,9 +127,9 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: Lock Broze Button
+  - name: Bronze Button
     originalName: 
-    pivot: {x: 0.5, y: -0.5714286}
+    pivot: {x: 0.7352941, y: -2.2941177}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -137,9 +137,9 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 32
-      height: 14
-    spriteID: b8e1f13c36ee19c4a810e3c14e66864e
+      width: 68
+      height: 34
+    spriteID: 57186c91da1d5454c93c9aff5c505bdc
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -153,25 +153,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 1157267677
+      value0: 2883000150
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: Lock Broze Button
+    name: Bronze Button
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: Lock Broze Button
+    - name: Bronze Button
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 0
-        y: 8
-        width: 32
-        height: 14
-      spriteId: b8e1f13c36ee19c4a810e3c14e66864e
+        x: 14
+        y: 78
+        width: 68
+        height: 34
+      spriteId: 57186c91da1d5454c93c9aff5c505bdc
     linkedCells: []
     tileCells: []
     tileSetIndex: 0
@@ -181,5 +181,5 @@ ScriptedImporter:
   generatePhysicsShape: 0
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 32, y: 32}
-  previousTextureSize: {x: 64, y: 32}
+  canvasSize: {x: 128, y: 128}
+  previousTextureSize: {x: 128, y: 64}
