@@ -10,7 +10,7 @@ public class Goals : MonoBehaviour
     public TextMeshProUGUI CompletedGoals_text;
 
     public GameObject GameOver;
-
+    public GameObject SkillTree;
     public MainScript mainScript;
     public CardManager cardManager;
     public AudioManager audioManager;
@@ -36,6 +36,8 @@ public class Goals : MonoBehaviour
                 Goal = Goal * GoalMultiplier;
 
                 mainScript.CompletedGoals++;
+                mainScript.goalsReachedThisRun++; // NEW: Track goals for prestige!
+
                 Goal_Text.text = "Goal: " + Mathf.RoundToInt(Goal);
                 mainScript.Gold = 0;
                 RemainingTime += 20f;
@@ -52,6 +54,9 @@ public class Goals : MonoBehaviour
                 RemainingTime = 0;
                 mainScript.isGameOver = true;
                 CompletedGoals_text.text = "Completed Goals: " + mainScript.CompletedGoals;
+
+                mainScript.EndRunAndCalculatePrestige();
+
                 GameOver.SetActive(true);
                 audioManager.DefeatSoundPick();
             }
@@ -61,10 +66,17 @@ public class Goals : MonoBehaviour
             Timer_Text.text = string.Format("{0:00}:{1:00}", minutes, seconds);
         }
     }
-
     public void RetryGame()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+    public void skill()
+    {
+        Time.timeScale = 1f;
+        GameOver.SetActive(false);
+        SkillTree.SetActive(true);
+
+    }
+
 }

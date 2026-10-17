@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class MainScript : MonoBehaviour
 {
+    [Header("Prestige / Skill Tree")]
+    public int totalSkillPoints;
+    public int goalsReachedThisRun; 
+    public float permanentGlobalMultiplier = 1f; 
     [Header("Card Buff Modifiers")]
     public float globalGoldMultiplier = 1f;
     public float baseGoldIncrement = 1f;
@@ -26,7 +30,6 @@ public class MainScript : MonoBehaviour
     public float[] availableSpeeds = { 1f, 2f, 5f };
     private int currentSpeedIndex = 0;
 
-    // Make sure to drag your AudioManager game object into this slot in the Unity Inspector!
     public AudioManager audioManager;
 
     public float doubleBoost = 1f;
@@ -40,6 +43,10 @@ public class MainScript : MonoBehaviour
 
     void Start()
     {
+        // LOAD saved prestige data from the hard drive when the scene starts
+        totalSkillPoints = PlayerPrefs.GetInt("SavedSkillPoints", 0);
+        permanentGlobalMultiplier = PlayerPrefs.GetFloat("SavedMultiplier", 1f);
+
         CalculateBoosts();
         UpdateSpeedUI();
     }
@@ -64,11 +71,12 @@ public class MainScript : MonoBehaviour
         int level3 = upgradeExponent.currentLevel;
         int level4 = upgradeBoost.currentLevel;
 
-        // FIXED: Removed the minus signs and added the * symbols
         boostMultiplier = 1f + (level4 * boosterIncrement);
         exponentBoost = 1f + ((level3 * compoundingIncrement) * boostMultiplier);
 
-        BaseGold = (baseGoldIncrement + (boostMultiplier * level2)) * globalGoldMultiplier;
+        // ADDED: * permanentGlobalMultiplier at the very end to apply the skill tree boost!
+        BaseGold = (baseGoldIncrement + (boostMultiplier * level2)) * globalGoldMultiplier * permanentGlobalMultiplier;
+
         doubleBoost = (int)Mathf.Pow(2, level1) * boostMultiplier;
     }
 
@@ -114,4 +122,32 @@ public class MainScript : MonoBehaviour
             SpeedButtonText.text = availableSpeeds[currentSpeedIndex] + "x Speed";
         }
     }
+    public void EndRunAndCalculatePrestige()
+    {
+        int pointsEarned = goalsReachedThisRun / 1;
+        totalSkillPoints += pointsEarned;
+
+        PlayerPrefs.SetInt("SavedSkillPoints", totalSkillPoints);
+        PlayerPrefs.Save();
+
+        Debug.Log("Run Ended! Earned " + pointsEarned + " Skill Points. Total: " + totalSkillPoints);
+    }
+
+    public void RebirthAndStartNewRun()
+    {
+        Gold = 0;
+        goalsReachedThisRun = 0;
+
+        UpgradeItem[] allStandardUpgrades = FindObjectsByType<UpgradeItem>(FindObjectsSortMode.None);
+        foreach (UpgradeItem upgrade in allStandardUpgrades)
+        {
+            upgrade.currentLevel = 0;
+
+
+            upgrade.UpdateUI();
+        }
+
+        CalculateBoosts();
+    }
 }
+

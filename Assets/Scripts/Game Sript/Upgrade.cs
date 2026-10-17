@@ -5,10 +5,9 @@ using UnityEngine.UI;
 
 public class UpgradeItem : MonoBehaviour
 {
-    public MainScript mainScript;
-    private TextMeshProUGUI CostText;
+    public TextMeshProUGUI CostText;
     public TextMeshProUGUI LevelText;
-    private TextMeshProUGUI InfoText;
+    public TextMeshProUGUI InfoText;
     public Button upgradeButton;
 
     [Header("Visuals")]
@@ -20,7 +19,7 @@ public class UpgradeItem : MonoBehaviour
     private Sprite[] clickFrames;
 
     private float[] textYOffsets;
-    private RectTransform[] textElementsToMove;
+    public RectTransform[] textElementsToMove;
     private float animSpeed = 0.03f;
 
     private Coroutine currentAnim;
@@ -32,31 +31,13 @@ public class UpgradeItem : MonoBehaviour
     public int currentLevel = 0;
     public int maxLevel = 5;
 
-    public AudioManager audioManager;
-
     void Start()
     {
-        defaultSprite = Resources.Load<Sprite>("Bronze Button");
-        lockedSprite = Resources.Load<Sprite>("Lock Bronze Button");
-        Transform costTransform = transform.parent.Find("Cost");
-        CostText = costTransform.GetComponent<TextMeshProUGUI>();
-        Transform infoTransform = transform.parent.Find("Info");
-        InfoText = infoTransform.GetComponent<TextMeshProUGUI>();
-        Sprite[] allSprites = Resources.LoadAll<Sprite>("Bronze Button Animation");
-
-        clickFrames = new Sprite[5];
-
-        foreach (Sprite spr in allSprites)
-        {
-            if (spr.name == "Frame_0") clickFrames[0] = spr;
-            else if (spr.name == "Frame_1") clickFrames[1] = spr;
-            else if (spr.name == "Frame_2") clickFrames[2] = spr;
-            else if (spr.name == "Frame_3") clickFrames[3] = spr;
-            else if (spr.name == "Frame_4") clickFrames[4] = spr;
-        }
+        defaultSprite = GameManager.Instance.spritesManager.Bronze_Button;
+        lockedSprite = GameManager.Instance.spritesManager.Lock_Bronze_Button;
+        clickFrames = GameManager.Instance.spritesManager.Bronze_Button_Animation;
 
         textYOffsets = new float[] { 0f, -2f, -4f, -2f, 0f };
-        textElementsToMove = new RectTransform[] { CostText.rectTransform, InfoText.rectTransform };
 
         UpdateUI();
         upgradeButton.onClick.AddListener(BuyUpgrade);
@@ -81,19 +62,19 @@ public class UpgradeItem : MonoBehaviour
         if (currentAnim != null) StopCoroutine(currentAnim);
         currentAnim = StartCoroutine(PlayClickAnimation());
 
-        if (mainScript.Gold >= currentCost)
+        if (GameManager.Instance.mainScript.Gold >= currentCost)
         {
-            mainScript.Gold -= currentCost;
+            GameManager.Instance.mainScript.Gold -= currentCost;
             currentCost = (int)(currentCost * costMultiplier);
             currentLevel++;
 
             UpdateUI();
-            mainScript.CalculateBoosts();
+            GameManager.Instance.mainScript.CalculateBoosts();
         }
 
-        if (audioManager != null)
+        if (GameManager.Instance.audioManager != null)
         {
-            audioManager.PlayClick();
+            GameManager.Instance.audioManager.PlayClick();
         }
     }
 
